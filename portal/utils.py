@@ -16,6 +16,19 @@ from scipy.sparse.csgraph import connected_components
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
 
+def filtering(adata_list
+            ):
+    for i, adata in enumerate(adata_list):
+        sc.pp.filter_cells(adata, min_genes=200)
+        sc.pp.filter_genes(adata, min_cells=3)
+        adata.var['mt'] = adata.var_names.str.startswith('MT-')  # annotate the group of mitochondrial genes as 'mt'
+        sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], percent_top=None, log1p=False, inplace=True)
+        adata = adata[adata.obs.n_genes_by_counts < 2500, :]
+        adata = adata[adata.obs.pct_counts_mt < 5, :]
+        adata.raw = adata
+        return adata_list
+
+
 def preprocess_datasets(adata_list, # list of anndata to be integrated
                         hvg_num=4000, # number of highly variable genes for each anndata
                         save_embedding=False, # save low-dimensional embeddings or not
@@ -26,6 +39,8 @@ def preprocess_datasets(adata_list, # list of anndata to be integrated
         raise ValueError("There should be at least two datasets for integration!")
 
     sample_size_list = []
+
+
 
     print("Finding highly variable genes...")
     for i, adata in enumerate(adata_list):
