@@ -22,7 +22,7 @@ def filtering(adata_list
         print("Filtering dataset %d..." % (i + 1))
         sc.pp.filter_cells(adata, min_genes=200)
         sc.pp.filter_genes(adata, min_cells=3)
-        adata.var['mt'] = adata.var_names.str.startswith('MT-')  # annotate the group of mitochondrial genes as 'mt'
+        adata.var['mt'] = adata.var_names.str.startswith('mt-')  # annotate the group of mitochondrial genes as 'mt'
         sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], percent_top=None, log1p=False, inplace=True)
         adata = adata[adata.obs.n_genes_by_counts < 2500, :]
         adata = adata[adata.obs.pct_counts_mt < 5, :]
@@ -153,7 +153,6 @@ def preprocess_recover_expression(adata_list, # list of anndata to be integrated
             else:
                 np.save(os.path.join(data_path, "lowdim_%d.npy" % (i + 1)), 
                         adata_total.obsm["X_pca"][indices[i-1]:indices[i], :npcs])
-
     lowdim = adata_total.obsm["X_pca"].copy()
     lowdim_list = [lowdim[:indices[0], :npcs] if i == 0 else lowdim[indices[i - 1]:indices[i], :npcs] for i in range(len(indices))]
 
@@ -939,4 +938,5 @@ def plot_UMAP(data, meta, space="latent", score=None, colors=["method"], subsamp
         fig.savefig(os.path.join(result_path, "%s-score.pdf" % space), bbox_inches='tight', dpi=300)
         fig = sc.pl.umap(adata[meta["method"]==method_set[0]], color="margin", palette=palette, groups=groups, return_fig=True, size=size)
         fig.savefig(os.path.join(result_path, "%s-margin.pdf" % space), bbox_inches='tight', dpi=300)
+    return adata
 
