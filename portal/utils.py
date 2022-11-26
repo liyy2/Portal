@@ -19,6 +19,7 @@ from scipy.spatial.distance import cdist
 def filtering(adata_list
             ):
     for i, adata in enumerate(adata_list):
+        print("Filtering dataset %d..." % (i + 1))
         sc.pp.filter_cells(adata, min_genes=200)
         sc.pp.filter_genes(adata, min_cells=3)
         adata.var['mt'] = adata.var_names.str.startswith('MT-')  # annotate the group of mitochondrial genes as 'mt'
@@ -26,7 +27,7 @@ def filtering(adata_list
         adata = adata[adata.obs.n_genes_by_counts < 2500, :]
         adata = adata[adata.obs.pct_counts_mt < 5, :]
         adata.raw = adata
-        return adata_list
+    return adata_list
 
 
 def preprocess_datasets(adata_list, # list of anndata to be integrated
@@ -307,7 +308,7 @@ def integrate_recover_expression(lowdim_list, # list of low-dimensional represen
     expression_scaled = pca.inverse_transform(emb_total)
     expression_log_normalized = expression_scaled * std + mean
 
-    return expression_scaled, expression_log_normalized
+    return expression_scaled, expression_log_normalized, emb_total
 
 
 def calculate_mixing_metric(data, meta, methods, k=5, max_k=300, subsample=True):
